@@ -1,14 +1,19 @@
 #!/usr/bin/python3
-#encoding:utf-8
-#仅用于生成模型,并不构成投资建议,任何投资与本程序无关!不承担任何责任
-#利用多项式回归来构建一个函数式,计算并预估未来价格
 import requests,json
 import numpy
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
-history=requests.get("https://api.coincap.io/v2/assets/bitcoin/history?interval=m30")
+#http_proxy  = "http://127.0.0.1:10809"
+#https_proxy = "https://127.0.0.1:10809"#请打开v2ray
+#proxyDict = { 
+              #"http"  : http_proxy, 
+              #"https" : https_proxy, 
+           # }
+url="https://api.coincap.io/v2/assets/bitcoin/history?interval=m30"
+#history=requests.get(url, proxies=proxyDict)
+history=requests.get(url)
 history=history.text
-#print(history)
+print(history)
 data=json.loads(history)
 y=[]
 dataprice=data['data']
@@ -29,8 +34,15 @@ print("标准差:",biaozhuncha)
 fangcha=numpy.var(y)
 print("方差:",fangcha)
 print("这个值应该大于,",len(x))
+print("最近一次统计的数值是:",y[-1])
 ask=int(input("请输入预测的值"))
 speed = mymodel(ask)
 print("根据统计的",len(y),"个数据,我们预估第",ask,"大概是",speed,"左右")
 print("多项式回归的拟合度为:",r2_score(y, mymodel(x)))
+if  speed>y[-1]:
+    bili=(speed/y[-1])
+    print("可能会涨",bili)
+else:
+    bili=(1-(speed/y[-1]))
+    print("可能会跌",bili)
 plt.show()
